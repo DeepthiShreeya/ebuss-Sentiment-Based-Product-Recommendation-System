@@ -1,0 +1,16 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Recommendations</title>
+  </head>
+  <body>
+    <h3>Top 5 recommendations for {{ username }}</h3>
+    <ul>
+      {% for r in recommendations %}
+        <li>{{ r }}</li>
+      {% endfor %}
+    </ul>
+    <a href="/">Back</a>
+  </body>
+</html>
