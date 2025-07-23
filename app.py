@@ -1,13 +1,22 @@
+import os, pickle
 from flask import Flask, request, render_template
-import pickle
 
-# Load matrices
+BASE = os.path.dirname(__file__)
+
+def _load_pickle(name):
+    for p in (os.path.join(BASE, name),
+              os.path.join(BASE, 'artifacts', name)):
+        if os.path.exists(p):
+            return pickle.load(open(p, 'rb'))
+    raise FileNotFoundError(name)
+
+# try hybrid first, else cf_matrix
 try:
-    hybrid_df = pickle.load(open('hybrid_df.pkl','rb'))
+    hybrid_df = _load_pickle('hybrid_df.pkl')
 except FileNotFoundError:
-    hybrid_df = pickle.load(open('cf_matrix.pkl','rb'))  # if you saved cf_matrix only
+    hybrid_df = _load_pickle('cf_matrix.pkl')
 
-train_r = pickle.load(open('train_r.pkl','rb'))
+train_r = _load_pickle('train_r.pkl')
 
 # Precompute a simple popularity order once (items most rated)
 _pop_order = train_r.notna().sum(axis=0).sort_values(ascending=False).index.tolist()
