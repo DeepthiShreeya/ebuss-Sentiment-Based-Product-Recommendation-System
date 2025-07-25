@@ -3,7 +3,7 @@ services:
     name: ebuss-recommender
     env: python
     plan: free
-    buildCommand: "pip install -r requirements.txt"
+    buildCommand: "pip install -r requirements.txt && cp artifacts/*.pkl ."
     startCommand: "gunicorn app:app --preload --bind 0.0.0.0:$PORT"
     autoDeploy: true
     envVars:
