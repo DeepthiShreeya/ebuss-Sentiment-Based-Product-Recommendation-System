@@ -120,6 +120,8 @@ sentiment_score_df = sentiment_score_df.reindex(cf_blend.columns, fill_value=sen
 pop_df = df[product_col].value_counts(normalize=True)
 pop_df = pop_df.reindex(cf_blend.columns, fill_value=0)
 
+best_cf_name = 'IBCF'
+
 # 8d) Final hybrid matrix
 hybrid_df = cf_blend.copy()
 hybrid_df += beta  * sentiment_score_df.values[np.newaxis, :]
