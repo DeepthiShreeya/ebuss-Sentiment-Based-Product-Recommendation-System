@@ -121,6 +121,7 @@ pop_df = df[product_col].value_counts(normalize=True)
 pop_df = pop_df.reindex(cf_blend.columns, fill_value=0)
 
 best_cf_name = 'IBCF'
+print("Best CF:", best_cf_name)
 
 # 8d) Final hybrid matrix
 hybrid_df = cf_blend.copy()
