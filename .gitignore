@@ -43,6 +43,10 @@ Desktop.ini
 # But still ignore any __pycache__ inside templates
 templates/**/__pycache__/
 
-# Generated artifacts and data (recreated at build time)
+# Ignore artifact and data (recreated at build time) folders
 artifacts/
 data/augment_data.csv
+
+#  Ignore stray pickle roots
+*.pkl          # but not pickles/*.pkl
+!pickles/*.pkl
