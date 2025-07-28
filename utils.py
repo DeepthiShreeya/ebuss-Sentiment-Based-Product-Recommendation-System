@@ -3,14 +3,19 @@ import nltk
 from nltk.corpus import stopwords, wordnet
 from nltk.stem import WordNetLemmatizer
 
-# Ensure NLTK data is available
-for pkg in ('stopwords', 'wordnet'):
-    try:
-        nltk.data.find(f'corpora/{pkg}')
-    except LookupError:
-        nltk.download(pkg)
+# Attempt to load stopwords; if missing, download them
+try:
+    _stop = set(stopwords.words('english'))
+except LookupError:
+    nltk.download('stopwords')
+    _stop = set(stopwords.words('english'))
 
-_stop = set(stopwords.words('english'))
+# Same for wordnet if you use it
+try:
+    nltk.data.find('corpora/wordnet')
+except LookupError:
+    nltk.download('wordnet')
+
 _lemm = WordNetLemmatizer()
 
 def clean_text(s: str) -> str:
