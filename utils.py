@@ -1,6 +1,14 @@
 import re
+import nltk
 from nltk.corpus import stopwords, wordnet
 from nltk.stem import WordNetLemmatizer
+
+# Ensure NLTK data is available
+for pkg in ('stopwords', 'wordnet'):
+    try:
+        nltk.data.find(f'corpora/{pkg}')
+    except LookupError:
+        nltk.download(pkg)
 
 _stop = set(stopwords.words('english'))
 _lemm = WordNetLemmatizer()
