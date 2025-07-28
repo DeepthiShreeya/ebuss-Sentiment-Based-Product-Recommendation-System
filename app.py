@@ -1,101 +1,59 @@
 import os
 import pickle
-from flask import Flask, request, render_template
+from flask import Flask, render_template, request, flash, redirect, url_for
+from model import recommend_top5
 
-# Base directory for locating pickles
-BASE = os.path.dirname(__file__)
+# Utility to load pickles from the pickles directory
+def _load_pickle(filename):
+    base = os.path.dirname(__file__)
+    path = os.path.join(base, 'pickles', filename)
+    if not os.path.exists(path):
+        raise FileNotFoundError(f"Could not find pickle: {filename}")
+    with open(path, 'rb') as f:
+        return pickle.load(f)
 
-def _load_pickle(name):
-    """
-    Attempt to load a pickle first from the project root,
-    then from the artifacts/ subfolder.
-    """
-    for path in (
-        os.path.join(BASE, name),
-        os.path.join(BASE, 'artifacts', name)
-    ):
-        if os.path.exists(path):
-            with open(path, 'rb') as f:
-                return pickle.load(f)
-    raise FileNotFoundError(f"Could not find pickle: {name}")
+# Load serialized artifacts (must match files in pickles/)
+cf_candidates    = _load_pickle('cf_candidates.pkl')
+vectorizer       = _load_pickle('vectorizer.pkl')
+sentiment_model  = _load_pickle('sentiment_model.pkl')
+meta_data        = _load_pickle('meta.pkl')
 
-# Load the hybrid recommendation matrix (falls back to CF-only if needed)
-try:
-    hybrid_df = _load_pickle('hybrid_df.pkl')
-except FileNotFoundError:
-    hybrid_df = _load_pickle('cf_matrix.pkl')
-
-# Load the training ratings matrix for masking seen items
-train_r = _load_pickle('train_r.pkl')
-
-# Precompute a global popularity order to backfill recommendations
-_pop_order = (
-    train_r.notna()
-           .sum(axis=0)
-           .sort_values(ascending=False)
-           .index
-           .tolist()
-)
-
-def _raw_cf_row(user_id):
-    """
-    Return the raw hybrid CF scores for a given user. If the user
-    is unknown, return a zero‑vector Series with the same index.
-    """
-    if user_id in hybrid_df.index:
-        return hybrid_df.loc[user_id]
-    # return an all‑zero Series matching the columns
-    return hybrid_df.iloc[0] * 0
-
-def recommend_top20(user_id, n=20):
-    """
-    Generate up to n recommendations for user_id, excluding already
-    seen items and backfilling with global popularity if needed.
-    """
-    # 1) get raw hybrid scores
-    row = _raw_cf_row(user_id)
-
-    # 2) mask out items the user has already rated
-    if user_id in train_r.index:
-        seen = set(train_r.loc[user_id].dropna().index)
-        row = row.drop(labels=seen, errors='ignore')
-
-    # 3) take the top‑n highest‑scoring items
-    recs = list(row.nlargest(n).index)
-
-    # 4) if fewer than n, backfill with unseen popular items
-    if len(recs) < n:
-        # find popular items the user hasn't seen or already been recommended
-        extras = [
-            item for item in _pop_order
-            if item not in recs and (user_id not in train_r.index or item not in train_r.loc[user_id].dropna().index)
-        ]
-        recs.extend(extras[: n - len(recs)])
-
-    return recs
-
-def recommend_top5(user_id):
-    """
-    Simply wrap recommend_top20 to produce top‑5 recommendations.
-    """
-    return recommend_top20(user_id, 5)
-
-# Initialize Flask
 app = Flask(__name__)
+# Use an env var for secret key in production
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'default-secret-key')
 
 @app.route('/', methods=['GET', 'POST'])
 def home():
-    if request.method == 'POST':
-        user_id = request.form.get('username', '').strip()
-        recs = recommend_top5(user_id)
-        return render_template(
-            'results.html',
-            username=user_id,
-            recommendations=recs
-        )
-    return render_template('index.html')
+    """
+    Handle home page rendering and recommendation form submission.
+    - GET: Render the input form without recommendations.
+    - POST: Process submitted username and display recommendations.
+    """
+    username = None
+    recommendations = []
 
-if __name__ == "__main__":
-    # Use PORT in env if provided (Render sets $PORT)
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port, debug=True)
+    if request.method == 'POST':
+        username = request.form.get('username', '').strip()
+        if username:
+            try:
+                recommendations = recommend_top5(
+                    username,
+                    cf_candidates=cf_candidates,
+                    vectorizer=vectorizer,
+                    sentiment_model=sentiment_model,
+                    meta_data=meta_data
+                )
+            except KeyError:
+                flash(f"User '{username}' not found.", 'error')
+                return redirect(url_for('home'))
+
+    return render_template(
+        'index.html',
+        username=username,
+        recommendations=recommendations
+    )
+
+if __name__ == '__main__':
+    # Pick up $PORT on Render, default to 5000 locally
+    port = int(os.getenv('PORT', 5000))
+    app.run(debug=True, host='0.0.0.0', port=port)
