@@ -21,7 +21,7 @@ meta_data       = _load_pickle('meta.pkl')
 def recommend_top5(username: str) -> list:
     # If user not in our dict, no recommendations
     if username not in cf_candidates:
-        return []
+        raise KeyError(username)
 
     # each value is a pandas.Series of {product_id: score}
     user_scores = cf_candidates[username]
