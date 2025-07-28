@@ -13,9 +13,9 @@ def _load_pickle(name: str):
 
 
 # Load precomputed artifacts
-cf_candidates = _load_pickle("pickles/cf_candidates.pkl")  # this is a dict
-vectorizer   = _load_pickle("pickles/vectorizer.pkl")
-sentiment_model = _load_pickle("pickles/sentiment_model.pkl")
+cf_candidates = _load_pickle("cf_candidates.pkl")  # this is a dict
+vectorizer   = _load_pickle("vectorizer.pkl")
+sentiment_model = _load_pickle("sentiment_model.pkl")
 meta_data       = _load_pickle('meta.pkl')
 
 def recommend_top5(username: str) -> list:
