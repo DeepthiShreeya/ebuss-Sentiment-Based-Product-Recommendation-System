@@ -1,12 +1,13 @@
 import pickle
 import numpy as np
 import pandas as pd
+import os, pickle
 
+BASE = os.path.dirname(__file__)
+PICKLE_DIR = os.path.join(BASE, "pickles")
 
-def _load_pickle(path: str):
-    """
-    Utility to load a pickle artifact from disk.
-    """
+def _load_pickle(name: str):
+    path = os.path.join(PICKLE_DIR, name)
     with open(path, "rb") as f:
         return pickle.load(f)
 
