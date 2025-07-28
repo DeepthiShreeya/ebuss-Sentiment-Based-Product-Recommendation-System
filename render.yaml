@@ -2,10 +2,13 @@ services:
   - type: web
     name: ebuss-recommender
     env: python
-    plan: free
-    buildCommand: "pip install -r requirements.txt && cp artifacts/*.pkl ."
-    startCommand: "gunicorn app:app --preload --bind 0.0.0.0:$PORT"
+    region: oregon
+    branch: main
+
+    # Force Python 3.11.9 (wheels exist for pandas/numpy/sklearn)
+    pythonVersion: 3.11.9
+
+    buildCommand: pip install -r requirements.txt && python prepare_artifacts.py
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --workers 2
+
     autoDeploy: true
-    envVars:
-      - key: OPENBLAS_NUM_THREADS
-        value: "1"
