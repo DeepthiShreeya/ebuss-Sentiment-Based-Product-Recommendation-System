@@ -1,7 +1,7 @@
 import pickle
 from utils import clean_text
 
-# Load sentiment artifacts (used if you expose sentiment endpoint)
+# Load sentiment artifacts 
 vectorizer = pickle.load(open('vectorizer.pkl','rb'))
 sentiment_model = pickle.load(open('sentiment_model.pkl','rb'))
 
