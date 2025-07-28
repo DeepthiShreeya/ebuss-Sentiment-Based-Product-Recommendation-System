@@ -36,13 +36,7 @@ def home():
         username = request.form.get('username', '').strip()
         if username:
             try:
-                recommendations = recommend_top5(
-                    username,
-                    cf_candidates=cf_candidates,
-                    vectorizer=vectorizer,
-                    sentiment_model=sentiment_model,
-                    meta_data=meta_data
-                )
+                recommendations = recommend_top5(username)
             except KeyError:
                 flash(f"User '{username}' not found.", 'error')
                 return redirect(url_for('home'))
