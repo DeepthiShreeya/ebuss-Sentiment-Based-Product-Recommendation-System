@@ -5,10 +5,12 @@ services:
     region: oregon
     branch: main
 
-    # Tell Render which Python to provision
-    runtime: python-3.11.9
+    # Pin Python here so Render doesn’t default to 3.13
+    pythonVersion: 3.11.9
 
-    buildCommand: pip install -r requirements.txt && python prepare_artifacts.py
+    buildCommand: |
+      pip install -r requirements.txt
+      python prepare_artifacts.py
     startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --workers 2
 
     autoDeploy: true
