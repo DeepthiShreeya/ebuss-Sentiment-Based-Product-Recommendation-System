@@ -1,36 +1,34 @@
-from flask import Flask, render_template, request
-from model import recommend_top5
+import pickle
+import numpy as np
+import pandas as pd
 
-app = Flask(__name__)
 
-@app.route('/health')
-def health():
-    return 'OK', 200
-
-@app.route('/', methods=['GET', 'POST'])
-def home():
+def _load_pickle(path: str):
     """
-    Handle home page rendering and recommendation form submission.
-    GET: render form.
-    POST: fetch recommendations for given username.
+    Utility to load a pickle artifact from disk.
     """
-    username = None
-    recommendations = []
+    with open(path, "rb") as f:
+        return pickle.load(f)
 
-    if request.method == 'POST':
-        username = request.form.get('username', '').strip()
-        if username:
-            try:
-                recommendations = recommend_top5(username)
-            except KeyError:
-                recommendations = []
 
-    return render_template(
-        'index.html',
-        username=username,
-        recommendations=recommendations
-    )
+# Load precomputed artifacts
+cf_candidates = _load_pickle("pickles/cf_candidates.pkl")
+vectorizer   = _load_pickle("pickles/vectorizer.pkl")
+sentiment_model = _load_pickle("pickles/sentiment_model.pkl")
 
-if __name__ == '__main__':
-    # Development server
-    app.run(debug=True)
+
+def recommend_top5(username: str) -> list:
+    """
+    Given a username, return top-5 product recommendations.
+    If the user is unknown, returns an empty list.
+    """
+    # If user not in CF index, no recommendations
+    if username not in cf_candidates.index:
+        return []
+
+    # Get similarity scores for this user
+    user_scores = cf_candidates.loc[username]
+
+    # Select top-5 highest-scoring product IDs
+    top_items = user_scores.nlargest(5).index.tolist()
+    return top_items
