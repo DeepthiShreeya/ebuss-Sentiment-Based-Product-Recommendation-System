@@ -22,6 +22,9 @@ itsdangerous>=2.0
 Jinja2>=3.0
 importlib-metadata>=3.6.0
 tqdm>=4.27
+-implicit==0.7.2
++implicit==0.6.0
+-nvidia-nccl-cu12
 
 
 
