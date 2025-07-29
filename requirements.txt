@@ -5,7 +5,7 @@
  flask==2.2.5
  flask-cors==6.0.1
  gunicorn==20.1.0
- implicit-cpu==0.7.2
+ implicit==0.7.2
  imbalanced-learn==0.12.4
  nltk==3.9.1
  scipy==1.10.0
