@@ -1,18 +1,21 @@
-from flask import Flask, request, render_template
-from model import recommend
+import os, pickle
+from flask import Flask, render_template, request
 
 app = Flask(__name__)
 
-@app.route("/", methods=["GET", "POST"])
-def index():
-    recs = None
-    if request.method == "POST":
-        user = request.form.get("username").strip()
-        try:
-            recs = recommend(user)
-        except Exception as e:
-            recs = f"Error: {e}"
-    return render_template("index.html", recommendations=recs)
+BASEDIR = os.path.abspath(os.path.dirname(__file__))
+PICKLE_DIR = os.path.join(BASEDIR, "pickles")
 
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+with open(os.path.join(PICKLE_DIR, "vectorizer.pkl"), "rb") as f:
+    vectorizer = pickle.load(f)
+# … same for sentiment_model.pkl, hybrid_df.pkl, train_r.pkl …
+
+@app.route("/", methods=["GET","POST"])
+def index():
+    recommendation = None
+    if request.method=="POST":
+        username = request.form["username"]
+        # call your recommendation + sentiment filter logic:
+        recommendation = make_recommendation(username)
+    return render_template("index.html", recommendations=recommendation)
+
