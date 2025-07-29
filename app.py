@@ -1,31 +1,38 @@
-import os
-import pickle
-import pandas as pd
 from flask import Flask, render_template, request
-import config
+import pandas as pd
 
-app = Flask(__name__)
+from config import Config
+from model import predict_sentiment, hybrid_df
+from utils import filter_top5_by_sentiment
 
-# Load artifacts at startup
-with open(config.VECTORIZER_PATH, "rb") as f:
-    vectorizer = pickle.load(f)
-with open(config.SENTIMENT_MODEL_PATH, "rb") as f:
-    sentiment_model = pickle.load(f)
-with open(config.TRAIN_R_PATH, "rb") as f:
-    train_r = pickle.load(f)           # e.g. user-item ratings matrix or similar
-hybrid_df = pd.read_pickle(config.HYBRID_DF_PATH)  # full DF of recommendations
+app = Flask(
+    __name__,
+    template_folder="templates",
+    static_folder="static"
+)
+app.config.from_object(Config)
 
-from utils import get_top20_recs, filter_top5_by_sentiment
+# load the full reviews dataset once
+REVIEWS_DF = pd.read_csv("data/sample30.csv")  
 
-@app.route("/", methods=["GET", "POST"])
-def index():
-    recommendations = None
-    if request.method == "POST":
-        username = request.form["username"].strip()
-        top20 = get_top20_recs(username, train_r, hybrid_df)
-        recommendations = filter_top5_by_sentiment(top20, sentiment_model, vectorizer)
-    return render_template("index.html", recommendations=recommendations)
+@app.route("/", methods=["GET"])
+def home():
+    return render_template("index.html")
+
+@app.route("/recommend", methods=["POST"])
+def recommend():
+    username = request.form.get("username")
+    if username not in hybrid_df[Config.USER_COL].values:
+        return render_template(
+            "index.html",
+            error=f"User '{username}' not found."
+        )
+    top5 = filter_top5_by_sentiment(username, REVIEWS_DF)
+    return render_template(
+        "index.html",
+        username=username,
+        recommendations=top5
+    )
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=config.PORT)
-
+    app.run(debug=True)
