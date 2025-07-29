@@ -8,7 +8,12 @@ PICKLE_DIR = os.path.join(BASEDIR, "pickles")
 
 with open(os.path.join(PICKLE_DIR, "vectorizer.pkl"), "rb") as f:
     vectorizer = pickle.load(f)
-# … same for sentiment_model.pkl, hybrid_df.pkl, train_r.pkl …
+with open(os.path.join(PICKLE_DIR, "sentiment_model.pkl"), "rb") as f:
+    sentiment_model = pickle.load(f)
+with open(os.path.join(PICKLE_DIR, "hybrid_df.pkl"), "rb") as f:
+    hybrid_df = pickle.load(f)
+with open(os.path.join(PICKLE_DIR, "train_r.pkl"), "rb") as f:
+    train_r = pickle.load(f)
 
 @app.route("/", methods=["GET","POST"])
 def index():
@@ -19,3 +24,5 @@ def index():
         recommendation = make_recommendation(username)
     return render_template("index.html", recommendations=recommendation)
 
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
