@@ -1,28 +1,25 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Sentiment‑Based Recommendations</title>
-</head>
-<body>
-  <h1>Product Recommendation</h1>
-  <form method="post">
-    <label for="username">Username:</label>
-    <input type="text" id="username" name="username" required>
-    <button type="submit">Get Recommendations</button>
-  </form>
-
-  {% if recommendations is not none %}
+<!doctype html>
+<html>
+  <head>
+    <title>Sentiment‐Based Recommender</title>
+  </head>
+  <body>
+    <h1>Ebuss: Top 5 Products for {{ username or "..." }}</h1>
+    {% if error %}
+      <p style="color:red">{{ error }}</p>
+    {% endif %}
+    <form action="/recommend" method="post">
+      <label for="username">Username:</label>
+      <input type="text" id="username" name="username" required>
+      <button type="submit">Get Recommendations</button>
+    </form>
     {% if recommendations %}
-      <h2>Top 5 Products for {{ request.form.username }}:</h2>
-      <ul>
+      <h2>Your Top 5 Products:</h2>
+      <ol>
         {% for prod in recommendations %}
           <li>{{ prod }}</li>
         {% endfor %}
-      </ul>
-    {% else %}
-      <p>No recommendations found for that user.</p>
+      </ol>
     {% endif %}
-  {% endif %}
-</body>
+  </body>
 </html>
