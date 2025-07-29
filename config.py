@@ -1,15 +1,18 @@
 import os
 
-# base directory of the app
-BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+BASE_DIR   = os.path.abspath(os.path.dirname(__file__))
+PICKLE_DIR = os.path.join(BASE_DIR, "pickles")
 
-# where your pickles live
-PICKLES_DIR = os.path.join(BASE_DIR, "pickles")
+class Config:
+    USER_COL       = "reviews_username"
+    PRODUCT_COL    = "name"
+    REVIEW_TEXT    = "reviews_text"
+    RATING_COL     = "reviews_rating"
+    SENTIMENT_COL  = "sentiment"
 
-VECTORIZER_PATH     = os.path.join(PICKLES_DIR, "vectorizer.pkl")
-SENTIMENT_MODEL_PATH= os.path.join(PICKLES_DIR, "sentiment_model.pkl")
-TRAIN_R_PATH        = os.path.join(PICKLES_DIR, "train_r.pkl")
-HYBRID_DF_PATH      = os.path.join(PICKLES_DIR, "hybrid_df.pkl")
+    # artifact filepaths
+    SENTIMENT_MODEL_PATH = os.path.join(PICKLE_DIR, "sentiment_model.pkl")
+    VECTORIZER_PATH      = os.path.join(PICKLE_DIR, "vectorizer.pkl")
+    HYBRID_DF_PATH       = os.path.join(PICKLE_DIR, "hybrid_df.pkl")
+    TRAIN_R_PATH         = os.path.join(PICKLE_DIR, "train_r.pkl")
 
-# port to listen on (Render sets PORT env var)
-PORT = int(os.environ.get("PORT", 5000))
