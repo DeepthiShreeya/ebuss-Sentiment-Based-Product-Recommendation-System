@@ -6,7 +6,7 @@ services:
     # install deps, pull LFS files, and (optionally) rebuild your artifacts 
     buildCommand: |
       pip install -r requirements.txt
-      git lfs pull           # <— add this if you keep pickles in LFS
+      git lfs pull           
     startCommand: gunicorn app:app
     envVars:
       - key: PYTHONUNBUFFERED
