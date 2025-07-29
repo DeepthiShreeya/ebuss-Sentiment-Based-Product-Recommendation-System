@@ -1,6 +1,13 @@
 services:
   - type: web
-    name: ebuss-recommender
+    name: ebuss-sentiment
     env: python
-    buildCommand: pip install -r requirements.txt
+    branch: main
+    # install deps, pull LFS files, and (optionally) rebuild your artifacts 
+    buildCommand: |
+      pip install -r requirements.txt
+      git lfs pull           # <— add this if you keep pickles in LFS
     startCommand: gunicorn app:app
+    envVars:
+      - key: PYTHONUNBUFFERED
+        value: "1"
