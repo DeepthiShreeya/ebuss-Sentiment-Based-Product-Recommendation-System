@@ -1,54 +1,38 @@
 import pickle
-import numpy as np
 import pandas as pd
-import os, pickle
 
-BASE = os.path.dirname(__file__)
-PICKLE_DIR = os.path.join(BASE, "pickles")
+# load artifacts
+with open("pickles/vectorizer.pkl","rb") as f:
+    vectorizer = pickle.load(f)
+with open("pickles/sentiment_model.pkl","rb") as f:
+    sent_model = pickle.load(f)
+with open("pickles/train_r.pkl","rb") as f:
+    train_r = pickle.load(f)            # user×item ratings matrix
+with open("pickles/hybrid_df.pkl","rb") as f:
+    hybrid_df = pickle.load(f)          # precomputed hybrid scores
 
-def _load_pickle(name: str):
-    path = os.path.join(PICKLE_DIR, name)
-    with open(path, "rb") as f:
-        return pickle.load(f)
-
-
-# Load precomputed artifacts
-cf_candidates = _load_pickle("cf_candidates.pkl")  # this is a dict
-vectorizer   = _load_pickle("vectorizer.pkl")
-sentiment_model = _load_pickle("sentiment_model.pkl")
-meta_data       = _load_pickle('meta.pkl')
-
-def recommend_top5(username: str) -> list:
-    # If user not in our dict, no recommendations
-    if username not in cf_candidates:
-        raise KeyError(username)
-
-    # get that user’s stored scores (might be Series, dict, or list)
-    user_scores = cf_candidates.get(username, [])
-
-    # if it’s already a Series, use nlargest
-    if isinstance(user_scores, pd.Series):
-        return user_scores.nlargest(5).index.tolist()
-
-    # if it’s a dict (prod_id -> score), turn into a Series
-    if isinstance(user_scores, dict):
-        s = pd.Series(user_scores)
-        return s.nlargest(5).index.tolist()
-
-    # if it’s a list:
-    #  • maybe it’s a list of (prod_id, score) tuples
-    #  • or maybe just a list of prod_ids already sorted
-    if isinstance(user_scores, list):
-        if user_scores and isinstance(user_scores[0], tuple):
-            # sort by score descending, take prod_ids
-            sorted_by_score = sorted(user_scores, key=lambda x: x[1], reverse=True)
-            return [pid for pid, _ in sorted_by_score[:5]]
-        # otherwise assume it’s already a list of IDs
-        return user_scores[:5]
-
-    # fallback: coerce to Series
-    try:
-        s = pd.Series(user_scores)
-        return s.nlargest(5).index.tolist()
-    except Exception:
-        return []
+def recommend(username, top_n=5):
+    """
+    1. Get top-20 from your recommender (e.g. ALS/hybrid_df).
+    2. For each, compute percent positive reviews via sent_model+vectorizer.
+    3. Return top_n sorted by positivity.
+    """
+    # 1) base recommendations:
+    user_ratings = hybrid_df.loc[username].sort_values(ascending=False).head(20)
+    candidates = user_ratings.index.tolist()
+    
+    # 2) fetch all reviews for these products, predict sentiment, aggregate:
+    # (assuming you have a df `reviews_df` with columns ['product_id','review_text'])
+    # load here if needed:
+    # reviews_df = pd.read_csv("path/to/reviews.csv")
+    # For brevity, let's assume hybrid_df also stores a list of reviews:
+    pos_rates = {}
+    for pid in candidates:
+        texts = hybrid_df.at[username, f"{pid}_reviews"]  # adjust to your storage
+        X = vectorizer.transform(texts)
+        preds = sent_model.predict(X)
+        pos_rates[pid] = preds.mean()
+    
+    # 3) pick top_n by pos_rate
+    top5 = sorted(pos_rates.items(), key=lambda x: x[1], reverse=True)[:top_n]
+    return [pid for pid, rate in top5]
