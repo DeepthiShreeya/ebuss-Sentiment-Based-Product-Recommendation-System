@@ -1,12 +1,12 @@
-flask==3.0.3
-gunicorn==21.2.0
-numpy>=1.26.4
-pandas<2.3.0,>=2.2.0
-scikit-learn<1.5.0,>=1.4.2
-xgboost>=1.7.0
-implicit==0.7.2
-imbalanced-learn>=0.9.0
-nltk>=3.8
+flask>=2.0
+gunicorn
+numpy
+pandas
+scikit-learn
+xgboost
+implicit
+imbalanced-learn
+nltk
 
 
 
