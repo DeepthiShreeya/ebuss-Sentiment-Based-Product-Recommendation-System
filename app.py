@@ -1,38 +1,19 @@
-from flask import Flask, render_template, request
-import pandas as pd
-
-from config import Config
+from flask import Flask, request, jsonify
 from model import predict_sentiment, hybrid_df
-from utils import filter_top5_by_sentiment
 
-app = Flask(
-    __name__,
-    template_folder="templates",
-    static_folder="static"
-)
-app.config.from_object(Config)
+app = Flask(__name__)
 
-# load the full reviews dataset once
-REVIEWS_DF = pd.read_csv("data/sample30.csv")  
+@app.route("/predict", methods=["POST"])
+def predict():
+    data = request.json["text_vector"]
+    pred = predict_sentiment(data)
+    return jsonify({"sentiment": int(pred[0])})
 
-@app.route("/", methods=["GET"])
-def home():
-    return render_template("index.html")
-
-@app.route("/recommend", methods=["POST"])
-def recommend():
-    username = request.form.get("username")
-    if username not in hybrid_df[Config.USER_COL].values:
-        return render_template(
-            "index.html",
-            error=f"User '{username}' not found."
-        )
-    top5 = filter_top5_by_sentiment(username, REVIEWS_DF)
-    return render_template(
-        "index.html",
-        username=username,
-        recommendations=top5
-    )
+@app.route("/recommend/<username>")
+def recommend(username):
+    # use hybrid_df to fetch recommendations…
+    recs = hybrid_df.get(username, [])  # whatever your logic is
+    return jsonify({"user": username, "recs": recs})
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run()
