@@ -1,15 +1,22 @@
-import pickle
+import os, pickle
 import pandas as pd
 
-# load artifacts
-with open("pickles/vectorizer.pkl","rb") as f:
-    vectorizer = pickle.load(f)
-with open("pickles/sentiment_model.pkl","rb") as f:
-    sent_model = pickle.load(f)
-with open("pickles/train_r.pkl","rb") as f:
-    train_r = pickle.load(f)            # user×item ratings matrix
-with open("pickles/hybrid_df.pkl","rb") as f:
-    hybrid_df = pickle.load(f)          # precomputed hybrid scores
+BASE = os.path.dirname(__file__)
+PICKLES_DIR = os.path.join(BASE, 'pickles')
+
+def load_pickle(name):
+    path = os.path.join(PICKLES_DIR, name)
+    if not os.path.exists(path):
+        raise FileNotFoundError(f"Missing artifact: {path}")
+    with open(path, 'rb') as f:
+        return pickle.load(f)
+
+# preload your artifacts
+vectorizer      = load_pickle('vectorizer.pkl')
+sentiment_model = load_pickle('sentiment_model.pkl')
+cf_candidates   = load_pickle('hybrid_df.pkl')   # or whatever your CF df is
+train_r         = load_pickle('train_r.pkl')
+
 
 def recommend(username, top_n=5):
     """
