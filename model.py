@@ -18,9 +18,9 @@ cf_candidates   = load_pickle('hybrid_df.pkl')   # or whatever your CF df is
 train_r         = load_pickle('train_r.pkl')
 
 
-def recommend(username, top_n=5):
+def get_recommendations(username):
     """
-    1. Get top-20 from your recommender (e.g. ALS/hybrid_df).
+    1. Get top-20 from our recommender (e.g. ALS/hybrid_df).
     2. For each, compute percent positive reviews via sent_model+vectorizer.
     3. Return top_n sorted by positivity.
     """
