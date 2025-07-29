@@ -1,4 +1,3 @@
-# config.py
 import os
 
 # base directory of the app
