@@ -1,3 +1,9 @@
+import sys
+import numpy as _np
+
+# module‐alias hack so pickle can find the old numpy._core
+sys.modules["numpy._core"] = _np.core
+
 import pickle
 from config import Config
 
