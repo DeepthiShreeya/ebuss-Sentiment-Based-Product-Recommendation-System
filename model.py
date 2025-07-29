@@ -1,45 +1,44 @@
-import os, pickle
+import os
+import pickle
+import numpy as np
 import pandas as pd
+from config import Config
 
-BASE = os.path.dirname(__file__)
-PICKLES_DIR = os.path.join(BASE, 'pickles')
+# --- load artifacts once at import time ---
+with open(Config.VECTORIZER_FILE, 'rb') as f:
+    vectorizer = pickle.load(f)
 
-def load_pickle(name):
-    path = os.path.join(PICKLES_DIR, name)
-    if not os.path.exists(path):
-        raise FileNotFoundError(f"Missing artifact: {path}")
-    with open(path, 'rb') as f:
-        return pickle.load(f)
+with open(Config.SENTIMENT_MODEL_FILE, 'rb') as f:
+    sentiment_model = pickle.load(f)
 
-# preload your artifacts
-vectorizer      = load_pickle('vectorizer.pkl')
-sentiment_model = load_pickle('sentiment_model.pkl')
-cf_candidates   = load_pickle('hybrid_df.pkl')   # or whatever your CF df is
-train_r         = load_pickle('train_r.pkl')
+with open(Config.HYBRID_DF_FILE, 'rb') as f:
+    hybrid_df = pickle.load(f)   # expects columns ['reviews_username','name','reviews_text',...]
 
+with open(Config.TRAIN_R_FILE, 'rb') as f:
+    train_r = pickle.load(f)     # expects a DataFrame indexed by username, cols=name
 
-def get_recommendations(username):
-    """
-    1. Get top-20 from our recommender (e.g. ALS/hybrid_df).
-    2. For each, compute percent positive reviews via sent_model+vectorizer.
-    3. Return top_n sorted by positivity.
-    """
-    # 1) base recommendations:
-    user_ratings = hybrid_df.loc[username].sort_values(ascending=False).head(20)
-    candidates = user_ratings.index.tolist()
-    
-    # 2) fetch all reviews for these products, predict sentiment, aggregate:
-    # (assuming you have a df `reviews_df` with columns ['product_id','review_text'])
-    # load here if needed:
-    # reviews_df = pd.read_csv("path/to/reviews.csv")
-    # For brevity, let's assume hybrid_df also stores a list of reviews:
-    pos_rates = {}
-    for pid in candidates:
-        texts = hybrid_df.at[username, f"{pid}_reviews"]  # adjust to your storage
+def recommend_top20(username, topn=20):
+    """Collaborative/hybrid rating lookup."""
+    if username not in train_r.index:
+        return []
+    user_series = train_r.loc[username].sort_values(ascending=False)
+    return user_series.head(topn).index.tolist()
+
+def filter_top5_by_sentiment(products, topk=5):
+    """From 20 recs, pick 5 with highest % positive reviews."""
+    scores = []
+    for p in products:
+        texts = hybrid_df.loc[hybrid_df['name']==p, 'reviews_text']
+        if texts.empty:
+            continue
         X = vectorizer.transform(texts)
-        preds = sent_model.predict(X)
-        pos_rates[pid] = preds.mean()
-    
-    # 3) pick top_n by pos_rate
-    top5 = sorted(pos_rates.items(), key=lambda x: x[1], reverse=True)[:top_n]
-    return [pid for pid, rate in top5]
+        preds = sentiment_model.predict(X)
+        pos_pct = np.mean(preds == 1)
+        scores.append((p, pos_pct))
+    # sort descending by pos_pct
+    scores.sort(key=lambda x: x[1], reverse=True)
+    return [p for p,_ in scores[:topk]]
+
+def get_top5(username):
+    top20 = recommend_top20(username)
+    return filter_top5_by_sentiment(top20)
