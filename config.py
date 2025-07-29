@@ -1,6 +1,6 @@
 import os
 
-BASE_DIR   = os.path.abspath(os.path.dirname(__file__))
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 PICKLE_DIR = os.path.join(BASE_DIR, "pickles")
 
 class Config:
@@ -15,4 +15,7 @@ class Config:
     VECTORIZER_PATH      = os.path.join(PICKLE_DIR, "vectorizer.pkl")
     HYBRID_DF_PATH       = os.path.join(PICKLE_DIR, "hybrid_df.pkl")
     TRAIN_R_PATH         = os.path.join(PICKLE_DIR, "train_r.pkl")
+
+
+
 
