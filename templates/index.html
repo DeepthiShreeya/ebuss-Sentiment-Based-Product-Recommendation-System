@@ -1,14 +1,33 @@
-<!doctype html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <title>eBuss Recommender</title>
-  </head>
-  <body>
-    <h2>Enter a Username to get Top‑5 Recommendations</h2>
-    <form method="post">
-      <input name="username" placeholder="username" required />
-      <button type="submit">Recommend</button>
-    </form>
-  </body>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>eBuss Sentiment‑Based Recommender</title>
+  <style>
+    body { font-family: sans-serif; max-width: 600px; margin: 2em auto; }
+    input, button { padding: 0.5em; font-size: 1em; }
+    ul { margin-top: 1em; }
+  </style>
+</head>
+<body>
+  <h1>eBuss Product Recommender</h1>
+  <form method="post">
+    <label for="username">Username:</label>
+    <input id="username" name="username" required>
+    <button type="submit">Get Top 5</button>
+  </form>
+
+  {% if recommendations %}
+    {% if recommendations is string %}
+      <p>{{ recommendations }}</p>
+    {% else %}
+      <h2>Your Top 5 Picks:</h2>
+      <ul>
+        {% for pid in recommendations %}
+          <li>{{ pid }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  {% endif %}
+</body>
 </html>
