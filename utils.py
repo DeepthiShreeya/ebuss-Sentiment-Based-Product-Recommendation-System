@@ -1,45 +1,32 @@
-import re
-import nltk
-from nltk.corpus import stopwords, wordnet
-from nltk.stem import WordNetLemmatizer
+import pandas as pd
+from config import Config
 
-# Attempt to load stopwords; if missing, download them
-try:
-    _stop = set(stopwords.words('english'))
-except LookupError:
-    nltk.download('stopwords')
-    _stop = set(stopwords.words('english'))
+def get_user_recs(username, n=20):
+    """
+    Return the top‐n products for a user from hybrid_df.
+    """
+    df = hybrid_df  # imported in model.py
+    recs = (
+        df[df[Config.USER_COL] == username]
+        .sort_values("rating", ascending=False)
+    )[Config.PRODUCT_COL].tolist()[:n]
+    return recs
 
-# Same for wordnet if you use it
-try:
-    nltk.data.find('corpora/wordnet')
-except LookupError:
-    nltk.download('wordnet')
-
-_lemm = WordNetLemmatizer()
-
-def clean_text(s: str) -> str:
-    s = str(s).lower()
-    s = re.sub(r'<[^>]+>', ' ', s)
-    s = re.sub(r'[^a-z0-9\s]', ' ', s)
-    toks = [w for w in s.split() if w not in _stop]
-    return ' '.join(_lemm.lemmatize(w) for w in toks)
-
-def synonym_replacement(sent: str, n_sr: int = 2) -> str:
-    import random
-    words = sent.split()
-    if not words:
-        return sent
-    new = words.copy()
-    idxs = list(range(len(words)))
-    random.shuffle(idxs)
-    rep = 0
-    for i in idxs:
-        syns = set(l.name().replace('_',' ') for syn in wordnet.synsets(words[i]) for l in syn.lemmas())
-        syns.discard(words[i])
-        if syns:
-            new[i] = random.choice(list(syns))
-            rep += 1
-        if rep >= n_sr:
-            break
-    return ' '.join(new)
+def filter_top5_by_sentiment(username, reviews_df):
+    """
+    reviews_df must have Config.PRODUCT_COL, Config.REVIEW_TEXT
+    """
+    top20 = get_user_recs(username, 20)
+    scores = {}
+    for prod in top20:
+        texts = reviews_df.loc[
+            reviews_df[Config.PRODUCT_COL] == prod,
+            Config.REVIEW_TEXT
+        ].dropna().tolist()
+        if not texts:
+            continue
+        preds = predict_sentiment(texts)
+        scores[prod] = preds.mean()
+    # pick top 5 by highest positive ratio
+    top5 = sorted(scores, key=lambda k: scores[k], reverse=True)[:5]
+    return top5
