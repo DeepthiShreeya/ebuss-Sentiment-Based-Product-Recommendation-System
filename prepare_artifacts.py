@@ -20,6 +20,7 @@ nltk.download('wordnet')
 from config import RANDOM_STATE, DATA_PATH, AUG_PATH, OUTPUT_DIR, TOPK_CF, ALPHA_BETA_GAMMA, PICKLE_DIR
 from utils import clean_text, synonym_replacement
 os.makedirs(PICKLE_DIR, exist_ok=True)
+os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 # 1) Load & detect columns
 df = pd.read_csv(DATA_PATH)
@@ -172,5 +173,5 @@ pickle.dump({
      'best_sent':  best_name,
      'best_cf':    best_cf_name
 }, open(os.path.join(PICKLE_DIR, "meta.pkl"), "wb"))
-
+OUTPUT_DIR = PICKLE_DIR
 print('Artifacts saved in', OUTPUT_DIR)
