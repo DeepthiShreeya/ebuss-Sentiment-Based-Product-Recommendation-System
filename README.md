@@ -28,16 +28,16 @@
   4. **Deployment**  
      - Flask backend (`app.py`, `model.py`) loads precomputed artifacts from `pickles/*.pkl`.  
      - Frontend template (`templates/index.html`) accepts a username and displays recommendations.  
-     - Deployed live on Render: _Your Live App URL Here_.
+     - Deployed live on Render: [https://ebuss-sentiment-based-product-5eus.onrender.com/]
 
 ## Conclusions
 - **Improved Relevance:** Integrating sentiment filtering reduces recommendations with high negative feedback.  
 - **Scalable Pipeline:** Precomputing CF candidates and sentiment scores allows sub‑second response times in production.  
-- **Reproducibility:** All artifacts (`cf_candidates.pkl`, `vectorizer.pkl`, `sentiment_model.pkl`, `meta.pkl`) and raw data are included for end‑to‑end reruns.  
+- **Reproducibility:** All artifacts (`hybrid_df.pkl`, `vectorizer.pkl`, `sentiment_model.pkl`, `train_r.pkl`) and raw data are included for end‑to‑end reruns.  
 - **Seamless Deployment:** A single build command (`python prepare_artifacts.py`) regenerates models and artifacts; the Flask app can run locally or on Render with a standard `gunicorn app:app` start.
 
 ## Technologies Used
-- **Python 3.11.9**  
+- **Python 3.9.13**  
 - **Flask** – web framework  
 - **pandas**, **NumPy** – data manipulation  
 - **scikit‑learn**, **XGBoost**, **imbalanced‑learn** – modeling & resampling  
