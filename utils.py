@@ -1,16 +1,16 @@
 import pandas as pd
 from config import Config
+from model import hybrid_df, predict_sentiment
 
 def get_user_recs(username, n=20):
     """
     Return the top‐n products for a user from hybrid_df.
     """
-    df = hybrid_df  # imported in model.py
-    recs = (
-        df[df[Config.USER_COL] == username]
-        .sort_values("rating", ascending=False)
-    )[Config.PRODUCT_COL].tolist()[:n]
-    return recs
+    df = hybrid_df
+    if username in df.index:
+        row = df.loc[username]
+        return row.nlargest(n).index.tolist()
+    return []
 
 def filter_top5_by_sentiment(username, reviews_df):
     """
