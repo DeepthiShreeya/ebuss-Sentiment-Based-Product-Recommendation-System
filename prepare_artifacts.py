@@ -17,8 +17,9 @@ import nltk
 nltk.download('stopwords')
 nltk.download('wordnet')
 
-from config import RANDOM_STATE, DATA_PATH, AUG_PATH, OUTPUT_DIR, TOPK_CF, ALPHA_BETA_GAMMA
+from config import RANDOM_STATE, DATA_PATH, AUG_PATH, OUTPUT_DIR, TOPK_CF, ALPHA_BETA_GAMMA, PICKLE_DIR
 from utils import clean_text, synonym_replacement
+os.makedirs(PICKLE_DIR, exist_ok=True)
 
 # 1) Load & detect columns
 df = pd.read_csv(DATA_PATH)
@@ -159,18 +160,17 @@ hybrid_df = hybrid_df.add(gamma * pop_df.values, axis=1)
 hybrid_df[~train_r.isna()] = -np.inf
 
 # 9) Save artifacts
-os.makedirs(OUTPUT_DIR, exist_ok=True)
-pickle.dump(train_r,        open(f"{OUTPUT_DIR}/train_r.pkl",        'wb'))
-pickle.dump(cf_blend,       open(f"{OUTPUT_DIR}/cf_matrix.pkl",      'wb'))
-pickle.dump(hybrid_df,      open(f"{OUTPUT_DIR}/hybrid_df.pkl",      'wb'))
-pickle.dump(vectorizer,     open(f"{OUTPUT_DIR}/vectorizer.pkl",     'wb'))
-pickle.dump(best_sent_model,open(f"{OUTPUT_DIR}/sentiment_model.pkl","wb"))
+pickle.dump(train_r,        open(os.path.join(PICKLE_DIR, "train_r.pkl"),        'wb'))
+pickle.dump(cf_blend,       open(os.path.join(PICKLE_DIR, "cf_matrix.pkl"),      'wb'))
+pickle.dump(hybrid_df,      open(os.path.join(PICKLE_DIR, "hybrid_df.pkl"),      'wb'))
+pickle.dump(vectorizer,     open(os.path.join(PICKLE_DIR, "vectorizer.pkl"),     'wb'))
+pickle.dump(best_sent_model,open(os.path.join(PICKLE_DIR, "sentiment_model.pkl"),'wb'))
 pickle.dump({
-    'rating_col': rating_col,
-    'user_col':   user_col,
-    'product_col':product_col,
-    'best_sent':  best_name,
-    'best_cf':    best_cf_name
-}, open(f"{OUTPUT_DIR}/meta.pkl","wb"))
+     'rating_col': rating_col,
+     'user_col':   user_col,
+     'product_col':product_col,
+     'best_sent':  best_name,
+     'best_cf':    best_cf_name
+}, open(os.path.join(PICKLE_DIR, "meta.pkl"), "wb"))
 
 print('Artifacts saved in', OUTPUT_DIR)
