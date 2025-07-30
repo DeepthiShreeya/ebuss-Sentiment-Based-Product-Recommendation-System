@@ -173,5 +173,4 @@ pickle.dump({
      'best_sent':  best_name,
      'best_cf':    best_cf_name
 }, open(os.path.join(PICKLE_DIR, "meta.pkl"), "wb"))
-OUTPUT_DIR = PICKLE_DIR
 print('Artifacts saved in', OUTPUT_DIR)
