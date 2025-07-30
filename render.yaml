@@ -10,4 +10,6 @@ services:
     envVars:
       - key: PYTHONUNBUFFERED
         value: "1"
+      - key: IMPLICIT_NO_CUDA
+        value: "1"
 
