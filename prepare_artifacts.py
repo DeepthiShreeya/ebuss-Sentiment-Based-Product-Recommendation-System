@@ -24,15 +24,15 @@ os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 # 1) Load & detect columns
 df = pd.read_csv(DATA_PATH)
-col_map = {'rating':None,'user':None,'product':None,'review_text':None}
+col_map = {'rating':None,'username':None,'product':None,'review_text':None}
 for c in df.columns:
     lc = c.lower()
     if col_map['rating'] is None and 'rating' in lc:      col_map['rating'] = c
-    if col_map['user']   is None and any(k in lc for k in ('user','username','userid')): col_map['user'] = c
+    if col_map['username']   is None and any(k in lc for k in ('username')): col_map['username'] = c
     if col_map['product'] is None and any(k in lc for k in ('product','item','asin','name')):  col_map['product'] = c
     if col_map['review_text'] is None and ('review' in lc and 'text' in lc): col_map['review_text'] = c
 rating_col, user_col, product_col, text_col = (
-    col_map['rating'], col_map['user'], col_map['product'], col_map['review_text']
+    col_map['rating'], col_map['username'], col_map['product'], col_map['review_text']
 )
 
 # 2) Clean & label
