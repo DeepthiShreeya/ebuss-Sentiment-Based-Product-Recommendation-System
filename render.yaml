@@ -4,14 +4,7 @@ services:
     env: python
     branch: main
     buildCommand: |
-      echo "=== render.yaml ==="
-      cat render.yaml
-      echo "=== pip install ==="
-      pip install -r requirements.txt
-      echo "=== prepare_artifacts.py ==="
-      python prepare_artifacts.py
-      echo "=== pickles/ contents ==="
-      ls -la pickles/
+        pip install -r requirements.txt && python prepare_artifacts.py
     startCommand: gunicorn app:app --bind 0.0.0.0:$PORT
     envVars:
       - key: PYTHONUNBUFFERED
