@@ -3,13 +3,15 @@ services:
     name: ebuss-sentiment
     env: python
     branch: main
-    # install deps and generate artifacts (pickles) during build
     buildCommand: |
+      echo "---- STARTING BUILD STEP ----"
       pip install -r requirements.txt
+      echo "---- RUNNING prepare_artifacts.py ----"
       python prepare_artifacts.py
+      echo "---- DONE, NOW LISTING pickles/ ----"
+      ls -l pickles/
     startCommand: gunicorn app:app --bind 0.0.0.0:$PORT
     envVars:
       - key: PYTHONUNBUFFERED
         value: "1"
-
 
