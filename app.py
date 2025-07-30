@@ -17,8 +17,7 @@ def predict():
 def recommend_form():
     username = request.form["username"]
     if username in hybrid_df.index:
-        row = hybrid_df.loc[username]
-        recs = row.nlargest(5).index.tolist()
+        recs = hybrid_df.loc[username].nlargest(5).index.tolist()
     else:
         recs = []
     return render_template("results.html", username=username, recommendations=recs)
