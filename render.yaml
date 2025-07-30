@@ -3,11 +3,11 @@ services:
     name: ebuss-sentiment
     env: python
     branch: main
-    # install deps, pull LFS files, and (optionally) rebuild your artifacts 
+    # install deps and generate artifacts (pickles) during build
     buildCommand: |
       pip install -r requirements.txt
-      git lfs pull           
-    startCommand: gunicorn app:app
+      python prepare_artifacts.py
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT
     envVars:
       - key: PYTHONUNBUFFERED
         value: "1"
