@@ -3,11 +3,11 @@ import os
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 PICKLE_DIR = os.path.join(BASE_DIR, "pickles")
 
-# Required by prepare_artifacts.py
+# Deployment‐time constants
 RANDOM_STATE     = 42
-DATA_PATH        = '/content/drive/MyDrive/EPGP in ML and AI/sample30.csv'
-AUG_PATH         = '/content/drive/MyDrive/EPGP in ML and AI/augment_data.csv'
-OUTPUT_DIR       = '/content/drive/MyDrive/EPGP in ML and AI/OUTPUT'
+DATA_PATH        = os.path.join(BASE_DIR, "data", "sample30.csv")      
+AUG_PATH         = os.path.join(PICKLE_DIR, "augment_data.csv")
+OUTPUT_DIR       = PICKLE_DIR  
 TOPK_CF          = 20
 ALPHA_BETA_GAMMA = (0.6, 0.3, 0.1)
 
