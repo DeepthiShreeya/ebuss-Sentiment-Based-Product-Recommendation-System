@@ -48,6 +48,6 @@ artifacts/
 data/augment_data.csv
 
 #  Ignore stray pickle roots
-*.pkl          # but not pickles/*.pkl
+*.pkl
 !pickles/
-pickles/*.pkl
+!pickles/*.pkl
