@@ -1,10 +1,5 @@
-import sys
-import numpy as _np
-
-# module‐alias hack so pickle can find the old numpy._core
-sys.modules["numpy._core"] = _np.core
-
 import pickle
+import numpy as np
 from config import Config
 
 # helper to load a pickle
