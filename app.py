@@ -30,6 +30,15 @@ def recommend_api(username):
         recs = []
     return jsonify({"user": username, "recs": recs})
 
+@app.route("/debug")
+def debug():
+    # show the first 20 users in the hybrid_df index
+    users = hybrid_df.index.tolist()[:20]
+    return jsonify({
+        "sample_users": users,
+        "total_users": len(users)
+    })
+
 if __name__ == "__main__":
     app.run()
 
