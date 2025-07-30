@@ -24,16 +24,19 @@ os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 # 1) Load & detect columns
 df = pd.read_csv(DATA_PATH)
-col_map = {'rating':None,'username':None,'product':None,'review_text':None}
+col_map = {'rating':None, 'username':None, 'product':None, 'review_text':None}
 for c in df.columns:
     lc = c.lower()
-    if col_map['rating'] is None and 'rating' in lc:      col_map['rating'] = c
-    if col_map['username']   is None and any(k in lc for k in ('username')): col_map['username'] = c
-    if col_map['product'] is None and any(k in lc for k in ('product','item','asin','name')):  col_map['product'] = c
-    if col_map['review_text'] is None and ('review' in lc and 'text' in lc): col_map['review_text'] = c
+    if col_map['rating']    is None and 'rating' in lc: col_map['rating'] = c
+    if col_map['username']      is None and 'username'   in lc: col_map['username']   = c
+    if col_map['product']   is None and any(k in lc for k in ('product','item','asin','name')): col_map['product'] = c
+    if col_map['review_text'] is None and 'reviews' in lc and 'text' in lc: col_map['review_text'] = c
+
 rating_col, user_col, product_col, text_col = (
     col_map['rating'], col_map['username'], col_map['product'], col_map['review_text']
 )
+user_col = "reviews_username"
+print(f"Using Columns -> rating: {rating_col}, username: {user_col}, product: {product_col}, review_text: {text_col}")
 
 # 2) Clean & label
 df = df.dropna(subset=[user_col, text_col]).drop_duplicates().reset_index(drop=True)
