@@ -18,6 +18,7 @@ vectorizer      = load_pickle(Config.VECTORIZER_PATH)
 hybrid_df       = load_pickle(Config.HYBRID_DF_PATH)
 train_r         = load_pickle(Config.TRAIN_R_PATH)
 
+
 def predict_sentiment(texts):
     """
     texts: list of review strings
