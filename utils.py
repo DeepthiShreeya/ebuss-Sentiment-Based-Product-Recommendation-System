@@ -4,9 +4,7 @@ import pandas as pd
 import nltk
 from nltk.corpus import stopwords, wordnet
 from nltk.stem import WordNetLemmatizer
-
 from config import Config
-from model import hybrid_df, predict_sentiment
 
 # Ensure NLTK resources are available
 nltk.download('stopwords', quiet=True)
@@ -60,6 +58,7 @@ def get_user_recs(username: str, n: int = 20) -> list[str]:
     """
     Return the top‑n products for a user from hybrid_df.
     """
+    from model import hybrid_df
     if username in hybrid_df.index:
         row = hybrid_df.loc[username]
         return row.nlargest(n).index.tolist()
@@ -71,6 +70,7 @@ def filter_top5_by_sentiment(username: str, reviews_df: pd.DataFrame) -> list[st
     pick the top‑20 collaborative recommendations, score each by its mean
     predicted sentiment, and return the top‑5 products.
     """
+    from model import predict_sentiment
     top20 = get_user_recs(username, 20)
     scores: dict[str, float] = {}
     for prod in top20:
