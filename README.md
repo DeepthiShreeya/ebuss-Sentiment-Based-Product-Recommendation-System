@@ -14,22 +14,27 @@
 - **Dataset**  
   We use a subset of the Amazon Reviews dataset (sample30.csv), containing user IDs, product names, ratings, and review text.
 - **Approach**  
-  1. **Preprocessing & Sentiment Modeling**  
-     - Clean and lemmatize review text.  
-     - Label ratings ≥ 4 as positive, < 4 as negative.  
-     - Augment negative examples via synonym replacement.  
-     - Train a RandomForest sentiment classifier on TF‑IDF features.  
-  2. **Item‑Based Collaborative Filtering**  
-     - Build an item–item cosine similarity matrix from user–item ratings.  
-     - Generate raw CF scores and select the top‑20 candidates per user.  
-  3. **Sentiment Re‑Ranking**  
-     - For each candidate, predict sentiment on all its reviews and compute the % positive.  
-     - Return the top‑5 products with the highest positive‑sentiment ratio.  
-  4. **Deployment**  
-     - Flask backend (`app.py`, `model.py`) loads precomputed artifacts from `pickles/*.pkl`.  
-     - Frontend template (`templates/index.html`) accepts a username and displays recommendations.  
-     - Deployed live on Render: [https://ebuss-sentiment-based-product-5eus.onrender.com/]
+1. **Preprocessing & Sentiment Modeling**  
+   - Clean & lemmatize review text  
+   - Label ratings ≥ 4 as positive, < 4 as negative  
+   - Augment negatives via synonym replacement  
+   - Train four sentiment models (Logistic Regression, RandomForest, XGBoost, Multinomial NB) on TF‑IDF; select best by F1.
 
+2. **Collaborative Filtering**  
+   - Build both user‑based and item‑based adjusted‑cosine similarity matrices  
+   - Choose the lower‑RMSE model on held‑out ratings  
+   - Generate the top‑20 CF candidate products per user.
+
+3. **Sentiment Re‑Ranking**  
+   - For each CF candidate, predict sentiment across its reviews and compute the positive ratio  
+   - Return the top‑5 products by highest positive‑sentiment ratio.
+
+4. **Deployment**  
+   - Build step: `pip install -r requirements.txt && python prepare_artifacts.py`  
+   - Flask app (`app.py`, `model.py`) loads fresh pickles from `pickles/` at startup  
+   - Frontend (`templates/index.html`) accepts a username and displays recommendations  
+   - Hosted on Render at  <https://ebuss-sentiment-based-product-5eus.onrender.com/>
+   
 ## Conclusions
 - **Improved Relevance:** Integrating sentiment filtering reduces recommendations with high negative feedback.  
 - **Scalable Pipeline:** Precomputing CF candidates and sentiment scores allows sub‑second response times in production.  
